@@ -15,7 +15,7 @@ public class OneNoteController {
   @Autowired
   AADAuthenticationProperties azureAd;
 
-  @GetMapping("/notes")
+  @GetMapping("/me")
   public User getNotes() {
     return GraphServiceClient.builder()
         .authenticationProvider(new OboAuthenticationProvider(
