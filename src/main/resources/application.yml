@@ -1,0 +1,13 @@
+server:
+  port: 8081
+azure:
+  activedirectory:
+    client-id: ${CLIENT_ID}
+    client-secret: ${CLIENT_SECRET}
+    app-id-uri: ${API_URL}
+    tenant-id: ${TENANT_ID}
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG
