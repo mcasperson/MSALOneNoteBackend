@@ -4,6 +4,7 @@ import club.caliope.udc.DocumentConverter;
 import club.caliope.udc.InputFormat;
 import club.caliope.udc.OutputFormat;
 import com.azure.core.annotation.PathParam;
+import com.microsoft.graph.http.BaseCollectionPage;
 import com.microsoft.graph.models.Notebook;
 import com.microsoft.graph.requests.GraphServiceClient;
 import com.microsoft.graph.requests.MessageRequest;
@@ -82,14 +83,13 @@ public class OneNoteController {
   }
 
   private List<Notebook> getNotebooks() {
-    final NotebookCollectionPage notebooks = client
+    return Optional.ofNullable(client
         .me()
         .onenote()
         .notebooks()
         .buildRequest()
-        .get();
-
-    // assume we will only ever have one page of results.
-    return notebooks != null ? notebooks.getCurrentPage() : List.of();
+        .get())
+        .map(BaseCollectionPage::getCurrentPage)
+        .orElseGet(List::of);
   }
 }
