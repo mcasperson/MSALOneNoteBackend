@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import okhttp3.Request;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,15 +27,17 @@ public class OneNoteController {
   @GetMapping("/notes/{name}/markdown")
   public String getNotes(@PathParam("name") final String name) {
     final List<Notebook> notebooks = getNotebooks();
-    final String url = notebooks.stream()
-        .filter(n -> n.displayName.equals(name))
+    final String content = notebooks.stream()
+        .filter(n -> name.equals(n.displayName))
         .findFirst()
-        .map(n -> n.sections.getCurrentPage().get(0))
-        .map(s -> s.pages.getCurrentPage().get(0))
-        .map(p -> p.contentUrl)
-        .orElse("");
+        .map(notebook -> notebook.sections)
+        .map(sections -> sections.getCurrentPage().get(0))
+        .map(section -> section.pages)
+        .map(pages -> pages.getCurrentPage().get(0))
+        .map(page -> page.contentUrl)
+        .flatMap(this::getPageContent)
+        .orElse("Failed to read notebook page");
 
-    final String content = getPageContent(url);
     return convertContent(content);
   }
 
@@ -72,9 +75,10 @@ public class OneNoteController {
     return "There was an error converting the file";
   }
 
-  private String getPageContent(final String url) {
-    return new MessageRequest(url, client, null)
-        .get().body.content;
+  private Optional<String> getPageContent(final String url) {
+    return Optional.ofNullable(new MessageRequest(url, client, null).get())
+        .map(r -> r.body)
+        .map(b -> b.content);
   }
 
   private List<Notebook> getNotebooks() {
