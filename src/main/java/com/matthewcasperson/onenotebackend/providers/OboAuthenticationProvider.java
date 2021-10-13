@@ -41,6 +41,10 @@ public class OboAuthenticationProvider extends BaseAuthenticationProvider {
   @Nonnull
   @Override
   public CompletableFuture<String> getAuthorizationTokenAsync(@Nonnull final URL url) {
+    if (!shouldAuthenticateRequestWithUrl(url)) {
+      return CompletableFuture.completedFuture(null);
+    }
+
     final AbstractOAuth2TokenAuthenticationToken oauth2Token =
         (AbstractOAuth2TokenAuthenticationToken) SecurityContextHolder
             .getContext()
