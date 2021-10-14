@@ -17,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import okhttp3.Request;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,6 +29,14 @@ public class OneNoteController {
 
   @Autowired
   GraphServiceClient<Request> client;
+
+  @GetMapping("/notes")
+  public List<String> getNotes() {
+    return getNotebooks()
+        .stream()
+        .map(n -> n.displayName)
+        .collect(Collectors.toList());
+  }
 
   @GetMapping("/notes/{name}/markdown")
   public String getNotes(@PathVariable("name") final String name) {
