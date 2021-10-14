@@ -3,12 +3,14 @@ package com.matthewcasperson.onenotebackend.controllers;
 import club.caliope.udc.DocumentConverter;
 import club.caliope.udc.InputFormat;
 import club.caliope.udc.OutputFormat;
-import com.azure.core.annotation.PathParam;
 import com.microsoft.graph.http.BaseCollectionPage;
 import com.microsoft.graph.models.Notebook;
+import com.microsoft.graph.models.OnenotePage;
+import com.microsoft.graph.models.OnenoteSection;
+import com.microsoft.graph.options.QueryOption;
 import com.microsoft.graph.requests.GraphServiceClient;
 import com.microsoft.graph.requests.MessageRequest;
-import com.microsoft.graph.requests.NotebookCollectionPage;
+import com.microsoft.graph.requests.OnenotePageCollectionPage;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,9 +35,7 @@ public class OneNoteController {
         .filter(n -> name.equals(n.displayName))
         .findFirst()
         .map(notebook -> notebook.sections)
-        .map(sections -> sections.getCurrentPage().get(0))
-        .map(section -> section.pages)
-        .map(pages -> pages.getCurrentPage().get(0))
+        .map(sections -> getSectionPages(sections.getCurrentPage().get(0).id).get(0))
         .map(page -> page.contentUrl)
         .flatMap(this::getPageContent)
         .orElse("Failed to read notebook page");
@@ -85,12 +85,24 @@ public class OneNoteController {
 
   private List<Notebook> getNotebooks() {
     return Optional.ofNullable(client
-        .me()
-        .onenote()
-        .notebooks()
-        .buildRequest()
-        .get())
+            .me()
+            .onenote()
+            .notebooks()
+            .buildRequest(new QueryOption("$expand", "sections"))
+            .get())
         .map(BaseCollectionPage::getCurrentPage)
+        .orElseGet(List::of);
+  }
+
+  private List<OnenotePage> getSectionPages(final String id) {
+    return Optional.ofNullable(client
+            .me()
+            .onenote()
+            .sections(id)
+            .pages()
+            .buildRequest()
+            .get())
+        .map(OnenotePageCollectionPage::getCurrentPage)
         .orElseGet(List::of);
   }
 }
