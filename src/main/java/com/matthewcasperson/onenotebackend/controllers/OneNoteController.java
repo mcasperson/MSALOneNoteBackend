@@ -65,7 +65,7 @@ public class OneNoteController {
 
       new DocumentConverter()
           .fromFile(input.toFile(), InputFormat.HTML)
-          .toFile(output.toFile(), OutputFormat.MARKDOWN)
+          .toFile(output.toFile(), "markdown_strict-raw_html")
           .convert();
 
       return Files.readString(output);
