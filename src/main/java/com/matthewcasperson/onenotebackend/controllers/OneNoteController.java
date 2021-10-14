@@ -37,8 +37,8 @@ public class OneNoteController {
         .findFirst()
         .map(notebook -> notebook.sections)
         .map(sections -> getSectionPages(sections.getCurrentPage().get(0).id).get(0))
-        .map(page -> page.contentUrl)
-        .flatMap(this::getPageContent)
+        .map(page -> page.id)
+        .map(this::getPageContent)
         .orElse("Failed to read notebook page");
 
     return convertContent(content);
@@ -78,18 +78,6 @@ public class OneNoteController {
     return "There was an error converting the file";
   }
 
-  private Optional<String> getPageContent(final String url) {
-    return Optional.ofNullable(new CustomRequest<>(url, client, null, InputStream.class).get())
-        .map(s -> {
-              try {
-                return new String(s.readAllBytes(), StandardCharsets.UTF_8);
-              } catch (Exception ex) {
-                return "";
-              }
-            }
-        );
-  }
-
   private List<Notebook> getNotebooks() {
     return Optional.ofNullable(client
             .me()
@@ -113,5 +101,18 @@ public class OneNoteController {
         .orElseGet(List::of);
   }
 
-
+  private String getPageContent(final String id) {
+    try {
+      return new String(client
+          .me()
+          .onenote()
+          .pages(id)
+          .content()
+          .buildRequest()
+          .get()
+          .readAllBytes(), StandardCharsets.UTF_8);
+    } catch (IOException e) {
+      return "Could not load page content";
+    }
+  }
 }
