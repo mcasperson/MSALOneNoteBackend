@@ -38,8 +38,8 @@ public class OneNoteController {
         .map(notebook -> notebook.sections)
         .map(sections -> getSectionPages(sections.getCurrentPage().get(0).id).get(0))
         .map(page -> page.id)
-        .map(this::getPageContent)
-        .orElse("Failed to read notebook page");
+        .flatMap(this::getPageContent)
+        .orElse("Could not load page content");
 
     return convertContent(content);
   }
@@ -101,18 +101,22 @@ public class OneNoteController {
         .orElseGet(List::of);
   }
 
-  private String getPageContent(final String id) {
-    try {
-      return new String(client
+  private Optional<String> getPageContent(final String id) {
+      return Optional.ofNullable(client
           .me()
           .onenote()
           .pages(id)
           .content()
           .buildRequest()
-          .get()
-          .readAllBytes(), StandardCharsets.UTF_8);
-    } catch (IOException e) {
-      return "Could not load page content";
+          .get())
+          .map(s -> toString(s, null));
+  }
+
+  private String toString(final InputStream stream, final String defaultValue) {
+    try {
+      return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
+    } catch (final IOException e) {
+      return defaultValue;
     }
   }
 }
