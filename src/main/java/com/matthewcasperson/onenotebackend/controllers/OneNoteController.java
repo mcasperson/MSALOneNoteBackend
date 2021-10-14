@@ -4,14 +4,15 @@ import club.caliope.udc.DocumentConverter;
 import club.caliope.udc.InputFormat;
 import club.caliope.udc.OutputFormat;
 import com.microsoft.graph.http.BaseCollectionPage;
+import com.microsoft.graph.http.CustomRequest;
 import com.microsoft.graph.models.Notebook;
 import com.microsoft.graph.models.OnenotePage;
-import com.microsoft.graph.models.OnenoteSection;
 import com.microsoft.graph.options.QueryOption;
 import com.microsoft.graph.requests.GraphServiceClient;
-import com.microsoft.graph.requests.MessageRequest;
 import com.microsoft.graph.requests.OnenotePageCollectionPage;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -78,9 +79,15 @@ public class OneNoteController {
   }
 
   private Optional<String> getPageContent(final String url) {
-    return Optional.ofNullable(new MessageRequest(url, client, null).get())
-        .map(r -> r.body)
-        .map(b -> b.content);
+    return Optional.ofNullable(new CustomRequest<>(url, client, null, InputStream.class).get())
+        .map(s -> {
+              try {
+                return new String(s.readAllBytes(), StandardCharsets.UTF_8);
+              } catch (Exception ex) {
+                return "";
+              }
+            }
+        );
   }
 
   private List<Notebook> getNotebooks() {
@@ -105,4 +112,6 @@ public class OneNoteController {
         .map(OnenotePageCollectionPage::getCurrentPage)
         .orElseGet(List::of);
   }
+
+
 }
