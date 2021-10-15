@@ -122,7 +122,7 @@ public class OneNoteController {
   }
 
   private String toString(final InputStream stream, final String defaultValue) {
-    try {
+    try (stream) {
       return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
     } catch (final IOException e) {
       return defaultValue;
