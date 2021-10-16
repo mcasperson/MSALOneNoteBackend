@@ -50,12 +50,19 @@ public class OneNoteController {
   private String getPageHTML(final String name) {
     return getNotebooks()
         .stream()
+        // find the notebook that matches the supplied name
         .filter(n -> name.equals(n.displayName))
+        // we only expect one notebook to match
         .findFirst()
+        // get the notebook sections
         .map(notebook -> notebook.sections)
+        // get the first page from the first section
         .map(sections -> getSectionPages(sections.getCurrentPage().get(0).id).get(0))
+        // get the page id
         .map(page -> page.id)
+        // get the content of the page
         .flatMap(this::getPageContent)
+        // if any of the operations above returned null, return an error message
         .orElse("Could not load page content");
   }
 
