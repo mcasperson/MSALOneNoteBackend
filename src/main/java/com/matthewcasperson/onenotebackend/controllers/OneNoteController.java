@@ -36,10 +36,20 @@ public class OneNoteController {
         .collect(Collectors.toList());
   }
 
+  @GetMapping("/notes/{name}/html")
+  public String getNoteHtml(@PathVariable("name") final String name) {
+    return getPageHTML(name);
+  }
+
   @GetMapping("/notes/{name}/markdown")
-  public String getNotes(@PathVariable("name") final String name) {
-    final List<Notebook> notebooks = getNotebooks();
-    final String content = notebooks.stream()
+  public String getNoteMarkdown(@PathVariable("name") final String name) {
+    final String content = getPageHTML(name);
+    return convertContent(content);
+  }
+
+  private String getPageHTML(final String name) {
+    return getNotebooks()
+        .stream()
         .filter(n -> name.equals(n.displayName))
         .findFirst()
         .map(notebook -> notebook.sections)
@@ -47,8 +57,6 @@ public class OneNoteController {
         .map(page -> page.id)
         .flatMap(this::getPageContent)
         .orElse("Could not load page content");
-
-    return convertContent(content);
   }
 
   private String convertContent(final String html) {
