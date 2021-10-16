@@ -2,9 +2,7 @@ package com.matthewcasperson.onenotebackend.controllers;
 
 import club.caliope.udc.DocumentConverter;
 import club.caliope.udc.InputFormat;
-import club.caliope.udc.OutputFormat;
 import com.microsoft.graph.http.BaseCollectionPage;
-import com.microsoft.graph.http.CustomRequest;
 import com.microsoft.graph.models.Notebook;
 import com.microsoft.graph.models.OnenotePage;
 import com.microsoft.graph.options.QueryOption;
